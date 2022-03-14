@@ -2,11 +2,14 @@ const axios = require('axios');
 
 const getStates = async (request, response)=>{
     try{
+        console.log("Inside call"); 
         const option = {
             method: 'get', 
             url: 'https://cdn-api.co-vin.in/api/v2/admin/location/states'
         }
         const dataRes = await axios(option); 
+
+        console.log("InsideResponse"); 
         response.status(200).send({
             'data': dataRes.data
         }); 
