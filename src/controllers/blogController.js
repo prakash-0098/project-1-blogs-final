@@ -90,7 +90,8 @@ const deleteBlogById = async (request, response)=>{
     try{
         const blogId = request.params.blogId; 
         const dataRes = await blogSchema.findByIdAndUpdate(blogId, {
-            isDeleted: true
+            isDeleted: true,
+            deletedAt: new Date()
         }); 
         return response.status(200).send({
             'status': true,
@@ -121,7 +122,10 @@ const deleteByQuery = async (request, response)=>{
                 }); 
             }
         }
-        const dataRes = await blogSchema.updateMany(data, { isDeleted: true }); 
+        const dataRes = await blogSchema.updateMany(data, { 
+            isDeleted: true,
+            deletedAt: new Date()
+        }); 
         return response.status(200).send({
             'status': true,
             'msg': 'Blog deleted successfully !'

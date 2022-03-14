@@ -5,14 +5,29 @@ const blogSchema = require('../models/blogsModel');
 
 const validateObjectId = (request, response, next)=>{
     try {
-        const { authorId } = request.body; 
-        if(ObjectId.isValid(authorId)){
-            next(); 
-        } 
+        const blogId = request.params.blogId; 
+        // for path prams blogId
+        if(blogId != undefined){
+            if(ObjectId.isValid(blogId)){
+                next(); 
+            } 
+            else{
+                return response.status(400).send({
+                    'Error: ': 'Only Object Id allowed !'
+                }); 
+            }
+        }
         else{
-            return response.status(400).send({
-                'Error: ': 'Only Object Id allowed !'
-            }); 
+            // for request body
+            const { authorId } = request.body; 
+            if(ObjectId.isValid(authorId)){
+                next(); 
+            } 
+            else{
+                return response.status(400).send({
+                    'Error: ': 'Only Object Id allowed !'
+                }); 
+            }
         }
     } catch (error) {
         return response.status(500).send({
@@ -35,24 +50,6 @@ const checkAuthorId = async (request, response, next)=>{
         return response.status(500).send({
             'Error: ': error.message
         }); 
-    }
-}
-
-const validateObjectIdByPath = (request, response, next)=>{
-    try {
-        const blogId = request.params.blogId; 
-        if(ObjectId.isValid(blogId)){
-            next(); 
-        } 
-        else{
-            return response.status(400).send({
-                'Error: ': 'Only Object Id allowed !'
-            }); 
-        }
-    } catch (error) {
-        return response.status(500).send({
-            'Error: ': error.message
-        });
     }
 }
 
@@ -84,6 +81,5 @@ const checkBlogByPath = async (request, response, next)=>{
 module.exports = {
     checkAuthorId: checkAuthorId,
     validateObjectId: validateObjectId,
-    validateObjectIdByPath: validateObjectIdByPath, //change
     checkBlogByPath: checkBlogByPath
 }
