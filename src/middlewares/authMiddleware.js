@@ -105,6 +105,7 @@ const authorization = async (request, response, next)=>{
                 }
                 else{
                     foundStatus = true; 
+                    break; 
                 }
             }
             if(!foundStatus){

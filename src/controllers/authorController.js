@@ -1,12 +1,22 @@
 const jwt = require('jsonwebtoken'); 
+const bcrypt = require('bcrypt'); 
 const authorSchema = require('../models/authorModel'); 
 
 const createAuthor = async (request, response)=>{
     try{
         const data = request.body; 
-        const dataRes = await authorSchema.create(data); 
-        return response.status(201).send({
-            'data': dataRes
+        bcrypt.hash(data.password, 10).then((encryptedPassword)=>{
+            data.password = encryptedPassword; 
+            authorSchema.create(data).then((dataRes)=>{
+                return response.status(201).send({
+                    'data': dataRes
+                }); 
+            }).catch((error)=>{
+                console.log(error)
+            }); 
+            
+        }).catch((error)=>{
+            console.log(error)
         }); 
     }catch(error){
         return response.status(500).send({
@@ -25,24 +35,28 @@ const login = async (request, response)=>{
         if(!dataRes){
             return response.status(404).send({
                 'status': false,
-                'msg': 'Email and Password not found !'
+                'msg': 'Email and Password not found !' // wrong email id
             }); 
         }
-        const passwordRes = await authorSchema.findOne(data); 
-        if(!passwordRes){
-            return response.status(404).send({
-                'status': false,
-                'msg': 'Email and Password not found !'
+        bcrypt.compare(data.password, dataRes.password).then((result)=>{
+            if(!result){
+                return response.status(404).send({
+                    'status': false,
+                    'msg': 'Email and Password not found !' // wrong password
+                }); 
+            }
+            const token = jwt.sign({
+                id: dataRes._id
+            }, '12345'); 
+            return response.send({
+                'status': true,
+                'msg': token
             }); 
-        }
-        const token = jwt.sign({
-            id: passwordRes._id
-        }, '12345'); 
-        return response.send({
-            'status': true,
-            'msg': token
-        }); 
-
+        }).catch((error)=>{
+            return response.status(500).send({
+                'Error: ': error.message
+            }); 
+        });  
     } catch (error) {
         return response.status(500).send({
             'Error: ': error.message
