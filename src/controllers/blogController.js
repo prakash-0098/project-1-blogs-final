@@ -1,4 +1,5 @@
 const blogSchema = require('../models/blogsModel');
+const jwt = require('jsonwebtoken'); 
 
 const createBlog = async (request, response) => {
     try {
@@ -61,9 +62,9 @@ const fetchBlogs = async (request, response) => {
 
 const updatedBlog = async (request, response) => {
     try {
-        const id = request.params.blogId;
+        const blogId = request.params.blogId;
         const data = request.body;
-        const fetchData = await blogSchema.findById(id);
+        const fetchData = await blogSchema.findById(blogId);
         if (fetchData.isDeleted) {
             return response.status(404).send({
                 'status': false,
@@ -108,12 +109,12 @@ const deleteByQuery = async (request, response)=>{
     try {
         const data = request.query; 
         const fetchData = await blogSchema.find(data);
-        if(fetchData.length == 0){
-            return response.status(404).send({
-                'status': false,
-                'msg': 'Blog not found !'
-            });
-        }
+        // if(fetchData.length == 0){
+        //     return response.status(404).send({
+        //         'status': false,
+        //         'msg': 'Blog not found !'
+        //     });
+        // }
         for(let i = 0; i < fetchData.length; i++){
             if(fetchData[i].isDeleted){
                 return response.status(404).send({
@@ -122,6 +123,8 @@ const deleteByQuery = async (request, response)=>{
                 }); 
             }
         }
+        const decodedToken = jwt.verify(request.headers['x-api-key'], '12345'); 
+        data.authorId = decodedToken.id; 
         const dataRes = await blogSchema.updateMany(data, { 
             isDeleted: true,
             deletedAt: new Date()

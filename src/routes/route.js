@@ -11,11 +11,13 @@ router.post('/blogs', authMiddleware.validateObjectId, authMiddleware.checkAutho
 
 router.get('/blogs', blogController.fetchBlogs); 
 
-router.put('/blogs/:blogId',authMiddleware.validateObjectId, blogController.updatedBlog); 
+router.put('/blogs/:blogId',authMiddleware.validateObjectId, authMiddleware.authorization, blogController.updatedBlog); 
 
-router.delete('/blogs/:blogId', authMiddleware.validateObjectId, authMiddleware.checkBlogByPath, blogController.deleteBlogById); 
+router.delete('/blogs/:blogId', authMiddleware.validateObjectId, authMiddleware.checkBlogByPath, authMiddleware.authorization, blogController.deleteBlogById); 
 
-router.delete('/blogs', blogController.deleteByQuery); 
+router.delete('/blogs', authMiddleware.authorization, blogController.deleteByQuery); 
+
+router.post('/login', authorController.login); 
 
 
 module.exports = router; 

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose'); 
+const jwt = require('jsonwebtoken');
 const ObjectId = mongoose.Types.ObjectId; 
 const authorSchema = require('../models/authorModel'); 
 const blogSchema = require('../models/blogsModel'); 
@@ -77,9 +78,72 @@ const checkBlogByPath = async (request, response, next)=>{
     }
 }
 
+const authorization = async (request, response, next)=>{
+    try {
+        const blogId = request.params.blogId; 
+        const token = request.headers['x-api-key']; 
+        if(!token){
+            return response.status(400).send({
+                'status': false,
+                'msg': 'Token must be present'
+            }); 
+        }
+        const decodedToken = jwt.verify(token, '12345');
+
+        if(Object.keys(request.query).length != 0){
+            const dataRes = await blogSchema.find(request.query); 
+            if(dataRes.length == 0){
+                return response.status(404).send({
+                    'status': false,
+                    'msg': 'Blogs not found !'
+                });
+            }
+            let foundStatus = false; 
+            for(let i = 0; i < dataRes.length; i++){
+                if(dataRes[i].authorId != decodedToken.id){
+                    foundStatus = false; 
+                }
+                else{
+                    foundStatus = true; 
+                }
+            }
+            if(!foundStatus){
+                return response.status(403).send({
+                    'status': false,
+                    'msg': 'You are not authorized !'
+                }); 
+            }
+            else{
+                next(); 
+            }
+        }
+        else if(blogId){
+            const userRes = await blogSchema.findById(blogId); 
+            if(userRes.authorId != decodedToken.id){
+                return response.status(403).send({
+                    'status': false,
+                    'msg': 'You are not authorized !'
+                }); 
+            }
+            next();
+        } 
+        else{
+            return response.status(400).send({
+                'status': false,
+                'msg': 'Bad Request'
+            });
+        }
+    } catch (error) {
+        return response.status(500).send({
+            'Error: ': error.message
+        });
+    }
+}
+
 
 module.exports = {
     checkAuthorId: checkAuthorId,
     validateObjectId: validateObjectId,
-    checkBlogByPath: checkBlogByPath
+    checkBlogByPath: checkBlogByPath,
+    authorization: authorization
 }
