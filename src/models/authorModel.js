@@ -18,8 +18,9 @@ const authorSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        match: /.+\@.+\..+/
-        // abc@gmail.com
+        lowercase: true,
+        match: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+        // abc@gmail.com  /.+\@.+\..+/
     },
     password: {
         type: String,
