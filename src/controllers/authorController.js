@@ -12,15 +12,29 @@ const createAuthor = async (request, response)=>{
                     'data': dataRes
                 }); 
             }).catch((error)=>{
-                console.log(error)
+                const key = Object.keys(error['errors']); // handle required validation
+                if(error['errors'][key]['kind'] == "required"){
+                    return response.status(400).send({
+                        'status': false,
+                        'msg: ': error.message
+                    }); 
+                }
+                return response.status(500).send({
+                    'status': false,
+                    'msg': error.message
+                }); 
             }); 
             
         }).catch((error)=>{
-            console.log(error)
+            return response.status(500).send({
+                'status': false,
+                'msg': error.message
+            }); 
         }); 
     }catch(error){
         return response.status(500).send({
-            'Error: ': error.message
+            'status': false,
+            'msg': error.message
         }); 
     }
 }
@@ -54,12 +68,14 @@ const login = async (request, response)=>{
             }); 
         }).catch((error)=>{
             return response.status(500).send({
-                'Error: ': error.message
+                'status': false,
+                'msg': error.message
             }); 
         });  
     } catch (error) {
         return response.status(500).send({
-            'Error: ': error.message
+            'status': false,
+            'msg': error.message
         }); 
     }
 }

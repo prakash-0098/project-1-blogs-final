@@ -13,9 +13,16 @@ const createBlog = async (request, response) => {
             'data': dataRes
         });
     } catch (error) {
+        const key = Object.keys(error['errors']);
+        if(error['errors'][key]['kind'] == "required"){
+            return response.status(400).send({
+                'status': false,
+                'msg: ': error.message
+            }); 
+        }
         return response.status(500).send({
             'status': false,
-            'Error: ': error.message
+            'msg': error.message
         });
     }
 }
@@ -55,7 +62,8 @@ const fetchBlogs = async (request, response) => {
         }
     } catch (error) {
         return response.status(500).send({
-            'Error: ': error.message
+            'status': false,
+            'msg': error.message
         });
     }
 }
@@ -68,7 +76,7 @@ const updatedBlog = async (request, response) => {
         if (fetchData.isDeleted) {
             return response.status(404).send({
                 'status': false,
-                'Error: ': 'Blog Not Found !'
+                'msg': 'Blog Not Found !'
             });
         }
         data.publishedAt = new Date();
@@ -78,11 +86,12 @@ const updatedBlog = async (request, response) => {
         });
         return response.status(200).send({
             'status': true,
-            'meg': dataRes
+            'msg': dataRes
         });
     } catch (error) {
         return response.status(500).send({
-            'Error: ': error.message
+            'status': false,
+            'msg': error.message
         });
     }
 }
@@ -100,7 +109,8 @@ const deleteBlogById = async (request, response)=>{
         }); 
     }catch(error){
         return response.status(500).send({
-            'Error: ': error.message
+            'status': false,
+            'msg': error.message
         });
     }
 }
@@ -109,12 +119,6 @@ const deleteByQuery = async (request, response)=>{
     try {
         const data = request.query; 
         const fetchData = await blogSchema.find(data);
-        // if(fetchData.length == 0){
-        //     return response.status(404).send({
-        //         'status': false,
-        //         'msg': 'Blog not found !'
-        //     });
-        // }
         for(let i = 0; i < fetchData.length; i++){
             if(fetchData[i].isDeleted){
                 return response.status(404).send({
@@ -135,7 +139,8 @@ const deleteByQuery = async (request, response)=>{
         }); 
     } catch (error) {
         return response.status(500).send({
-            'Error: ': error.message
+            'status': false,
+            'msg': error.message
         });
     }
 }
