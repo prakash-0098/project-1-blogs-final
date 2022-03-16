@@ -12,12 +12,20 @@ const createAuthor = async (request, response)=>{
                     'data': dataRes
                 }); 
             }).catch((error)=>{
-                const key = Object.keys(error['errors']); // handle required validation
-                if(error['errors'][key]['kind'] == "required"){
-                    return response.status(400).send({
+                if(error.code == 11000){
+                    return response.status(409).send({
                         'status': false,
                         'msg: ': error.message
-                    }); 
+                    });
+                }
+                const key = Object.keys(error['errors']); // handle required validation
+                for(let i = 0; i < key.length; i++){
+                    if(error['errors'][key]['kind'] == "required"){
+                        return response.status(400).send({
+                            'status': false,
+                            'msg: ': error.message
+                        }); 
+                    }
                 }
                 return response.status(500).send({
                     'status': false,

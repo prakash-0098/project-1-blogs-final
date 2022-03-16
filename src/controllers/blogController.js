@@ -14,11 +14,13 @@ const createBlog = async (request, response) => {
         });
     } catch (error) {
         const key = Object.keys(error['errors']);
-        if(error['errors'][key]['kind'] == "required"){
-            return response.status(400).send({
-                'status': false,
-                'msg: ': error.message
-            }); 
+        for(let i = 0; i < key.length; i++){
+            if(error['errors'][key]['kind'] == "required"){
+                return response.status(400).send({
+                    'status': false,
+                    'msg: ': error.message
+                }); 
+            }
         }
         return response.status(500).send({
             'status': false,
@@ -81,7 +83,7 @@ const updatedBlog = async (request, response) => {
         }
         data.publishedAt = new Date();
         data.isPublished = true
-        const dataRes = await blogSchema.findByIdAndUpdate(request.params.blogId, data, {
+        const dataRes = await blogSchema.findByIdAndUpdate(blogId, data, {
             new: true
         });
         return response.status(200).send({
