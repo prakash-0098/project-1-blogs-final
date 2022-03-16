@@ -20,7 +20,7 @@ const createAuthor = async (request, response)=>{
                 }
                 const key = Object.keys(error['errors']); // handle required validation
                 for(let i = 0; i < key.length; i++){
-                    if(error['errors'][key]['kind'] == "required"){
+                    if(error['errors'][key[i]]['kind'] == "required"){
                         return response.status(400).send({
                             'status': false,
                             'msg: ': error.message
