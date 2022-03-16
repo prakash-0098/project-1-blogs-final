@@ -126,6 +126,12 @@ const authorization = async (request, response, next)=>{
         }
         else if(blogId){
             const userRes = await blogSchema.findById(blogId); 
+            if(!userRes){
+                return response.status(404).send({
+                    'status': false,
+                    'msg': 'Blog Not Found !'
+                });
+            }
             if(userRes.authorId != decodedToken.id){
                 return response.status(403).send({
                     'status': false,
