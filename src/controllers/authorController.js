@@ -12,7 +12,7 @@ const createAuthor = async (request, response)=>{
                     'data': dataRes
                 }); 
             }).catch((error)=>{
-                if(error.code == 11000){
+                if(error.code == 11000){ //conflict or Duplicate data
                     return response.status(409).send({
                         'status': false,
                         'msg: ': error.message
