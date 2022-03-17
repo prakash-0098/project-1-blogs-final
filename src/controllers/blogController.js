@@ -1,5 +1,5 @@
 const blogSchema = require('../models/blogsModel');
-const jwt = require('jsonwebtoken'); 
+const jwt = require('jsonwebtoken');
 
 const createBlog = async (request, response) => {
     try {
@@ -14,12 +14,12 @@ const createBlog = async (request, response) => {
         });
     } catch (error) {
         const key = Object.keys(error['errors']);
-        for(let i = 0; i < key.length; i++){
-            if(error['errors'][key[i]]['kind'] == "required"){
+        for (let i = 0; i < key.length; i++) {
+            if (error['errors'][key[i]]['kind'] == "required") {
                 return response.status(400).send({
                     'status': false,
                     'msg: ': error.message
-                }); 
+                });
             }
         }
         return response.status(500).send({
@@ -47,9 +47,11 @@ const fetchBlogs = async (request, response) => {
             });
         }
         else {
+            const decodedToken = jwt.verify(request.headers['x-api-key'], '12345');
             const dataRes = await blogSchema.find({
                 isDeleted: false,
-                isPublished: true
+                isPublished: true,
+                authorId: decodedToken.id
             });
             if (dataRes.length == 0) {
                 return response.status(404).send({
@@ -98,18 +100,18 @@ const updatedBlog = async (request, response) => {
     }
 }
 
-const deleteBlogById = async (request, response)=>{
-    try{
-        const blogId = request.params.blogId; 
+const deleteBlogById = async (request, response) => {
+    try {
+        const blogId = request.params.blogId;
         const dataRes = await blogSchema.findByIdAndUpdate(blogId, {
             isDeleted: true,
             deletedAt: new Date()
-        }); 
+        });
         return response.status(200).send({
             'status': true,
             'msg': 'Blog deleted successfully !'
-        }); 
-    }catch(error){
+        });
+    } catch (error) {
         return response.status(500).send({
             'status': false,
             'msg': error.message
@@ -117,28 +119,28 @@ const deleteBlogById = async (request, response)=>{
     }
 }
 
-const deleteByQuery = async (request, response)=>{
+const deleteByQuery = async (request, response) => {
     try {
-        const data = request.query; 
+        const decodedToken = jwt.verify(request.headers['x-api-key'], '12345');
+        const data = request.query;
+        data.authorId = decodedToken.id;
+        data.isDeleted = false;
+
         const fetchData = await blogSchema.find(data);
-        for(let i = 0; i < fetchData.length; i++){
-            if(fetchData[i].isDeleted){
-                return response.status(404).send({
-                    'status': false,
-                    'msg': 'Blog not found !'
-                }); 
-            }
+        if(fetchData.length == 0){
+            return response.status(404).send({
+                'status': false,
+                'msg': 'Blog not found !'
+            });
         }
-        const decodedToken = jwt.verify(request.headers['x-api-key'], '12345'); 
-        data.authorId = decodedToken.id; 
-        const dataRes = await blogSchema.updateMany(data, { 
+        const dataRes = await blogSchema.updateMany(data, {
             isDeleted: true,
             deletedAt: new Date()
-        }); 
+        });
         return response.status(200).send({
             'status': true,
-            'msg': 'Blog deleted successfully !'
-        }); 
+            'msg': `${dataRes.modifiedCount} Blog deleted successfully !`,
+        });
     } catch (error) {
         return response.status(500).send({
             'status': false,
