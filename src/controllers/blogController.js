@@ -31,9 +31,11 @@ const createBlog = async (request, response) => {
 
 const fetchBlogs = async (request, response) => {
     try {
+        const decodedToken = jwt.verify(request.headers['x-api-key'], '12345');
         if (Object.keys(request.query).length != 0) {
             request.query.isDeleted = false;
             request.query.isPublished = true;
+            request.query.authorId = decodedToken.id;
             const dataRes = await blogSchema.find(request.query);
             if (dataRes.length == 0) {
                 return response.status(404).send({
@@ -43,11 +45,11 @@ const fetchBlogs = async (request, response) => {
             }
             return response.status(200).send({
                 'status': true,
+                'count': dataRes.length,
                 'data': dataRes
             });
         }
         else {
-            const decodedToken = jwt.verify(request.headers['x-api-key'], '12345');
             const dataRes = await blogSchema.find({
                 isDeleted: false,
                 isPublished: true,
@@ -61,6 +63,7 @@ const fetchBlogs = async (request, response) => {
             }
             return response.status(200).send({
                 'status': true,
+                'count': dataRes.length,
                 'data': dataRes
             });
         }
