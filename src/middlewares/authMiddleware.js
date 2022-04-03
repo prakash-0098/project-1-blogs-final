@@ -67,7 +67,7 @@ const checkBlogByPath = async (request, response, next) => {
 
 const authorization = async (request, response, next) => {
     try {
-        const blogId = request.params.blogId; 
+        const blogId = request.params.blogId;
         const token = request.headers['x-api-key'];
         if (!token) {
             return response.status(400).send({
@@ -77,70 +77,70 @@ const authorization = async (request, response, next) => {
         }
 
         const decodedToken = jwt.verify(token, '12345');
-        if(request.body.authorId){
+        if (request.body.authorId) {
             if (request.body.authorId != decodedToken.id) {
                 return response.status(403).send({
                     'status': false,
                     'msg': 'You are not authorized !'
                 });
             }
-            next(); 
+            next();
         }
-        else if(Object.keys(request.query).length != 0){
-            const dataRes = await blogSchema.find(request.query); 
-            if(dataRes.length == 0){
+        else if (Object.keys(request.query).length != 0) {
+            const dataRes = await blogSchema.find(request.query);
+            if (dataRes.length == 0) {
                 return response.status(404).send({
                     'status': false,
                     'msg': 'Blogs not found !'
                 });
             }
-            let foundStatus = false; 
-            for(let i = 0; i < dataRes.length; i++){
-                if(dataRes[i].authorId != decodedToken.id){
-                    foundStatus = false; 
+            let foundStatus = false;
+            for (let i = 0; i < dataRes.length; i++) {
+                if (dataRes[i].authorId != decodedToken.id) {
+                    foundStatus = false;
                 }
-                else{
-                    foundStatus = true; 
-                    break; 
+                else {
+                    foundStatus = true;
+                    break;
                 }
             }
-            if(!foundStatus){
+            if (!foundStatus) {
                 return response.status(403).send({
                     'status': false,
                     'msg': 'You are not authorized !'
-                }); 
+                });
             }
-            else{
-                next(); 
+            else {
+                next();
             }
         }
-        else if(blogId){
-            const userRes = await blogSchema.findById(blogId); 
-            if(!userRes){
+        else if (blogId) {
+            const userRes = await blogSchema.findById(blogId);
+            if (!userRes) {
                 return response.status(404).send({
                     'status': false,
                     'msg': 'Blog Not Found !'
                 });
             }
-            if(userRes.authorId != decodedToken.id){
-                return response.status(403).send({
-                    'status': false,
-                    'msg': 'You are not authorized !'
-                }); 
-            }
-            next();
-        } 
-        else{
-            const getBlogRes = await blogSchema.find({
-                'authorId': decodedToken.id
-            }); 
-            if(getBlogRes.length == 0){
+            if (userRes.authorId != decodedToken.id) {
                 return response.status(403).send({
                     'status': false,
                     'msg': 'You are not authorized !'
                 });
             }
-            next(); 
+            next();
+        }
+        else {
+            const getBlogRes = await blogSchema.find({
+                'authorId': decodedToken.id
+            });
+            if (getBlogRes.length == 0) {
+                return response.status(403).send({
+                    'status': false,
+                    'msg': 'You are not authorized !'
+                });
+            }
+            next();
         }
 
     }

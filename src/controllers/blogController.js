@@ -130,7 +130,7 @@ const deleteByQuery = async (request, response) => {
         data.isDeleted = false;
 
         const fetchData = await blogSchema.find(data);
-        if(fetchData.length == 0){
+        if (fetchData.length == 0) {
             return response.status(404).send({
                 'status': false,
                 'msg': 'Blog not found !'
