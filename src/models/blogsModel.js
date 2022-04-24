@@ -1,27 +1,31 @@
-const mongoose = require('mongoose'); 
-const ObjectId = mongoose.Types.ObjectId; 
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 const blogSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: true
+        required: [true, 'The title field is required'],
+        trim: true
     },
-    body:{
+    body: {
         type: String,
-        required: true
+        required: [true, 'The body field is required'],
+        trim: true
     },
-    authorId:{
+    authorId: {
         type: ObjectId,
         ref: 'Author',
-        required: true
+        required: [true, 'The authorId field is required'],
+        trim: true
     },
     tags: [String],
     category: {
-        type: String, 
-        required: true
+        type: String,
+        required: [true, 'The category field is required'],
+        trim: true
     },
     subcategory: [String],
-    deletedAt: Date, 
+    deletedAt: Date,
     isDeleted: {
         type: Boolean,
         default: false
@@ -31,9 +35,9 @@ const blogSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     }
-},{
+}, {
     timestamps: true
-}); 
+});
 
 module.exports = mongoose.model('Blog', blogSchema); //db collection name will be in blogs
 
