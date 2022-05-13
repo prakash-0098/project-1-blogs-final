@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const blogSchema = require('../models/blogsModel');
-const middleware = require('../middlewares/authMiddleware');
 const jwt = require('jsonwebtoken');
 
 const handleObjectId = (id) => {
@@ -25,18 +24,28 @@ const createBlog = async (request, response) => {
                     message: 'Only mongodb object id are allowed'
                 });
             }
-            const isAuthorized = await middleware.authorization(request, response, data.authorId);
-            if (isAuthorized) {
-                if (request.body.isPublished != undefined) {
-                    data.publishedAt = new Date();
-                }
-                const dataRes = await blogSchema.create(data);
-                return response.status(201).send({
-                    status: true,
-                    message: 'Blog created success',
-                    data: dataRes
+            const decodedToken = jwt.verify(request.headers['x-api-key'], '12345');
+            if (decodedToken.id != data.authorId) {
+                return response.status(400).send({
+                    status: false,
+                    message: 'authorId does not match with token'
                 });
             }
+            if (request.body.isPublished != undefined) {
+                data.publishedAt = new Date();
+            }
+            const dataRes = await blogSchema.create(data);
+            return response.status(201).send({
+                status: true,
+                message: 'Blog created success',
+                data: dataRes
+            });
+        }
+        else {
+            return response.status(400).send({
+                status: false,
+                message: 'AuthorId field is required'
+            });
         }
     } catch (error) {
         if (error['errors'] != null) {
@@ -129,19 +138,16 @@ const updatedBlog = async (request, response) => {
                 message: 'Blog Not Found !'
             });
         }
-        const isAuthorized = await middleware.authorization(request, response, blogRes.authorId);
-        if (isAuthorized) {
-            data.publishedAt = new Date();
-            data.isPublished = true
-            const dataRes = await blogSchema.findByIdAndUpdate(blogId, data, {
-                new: true
-            });
-            return response.status(200).send({
-                status: true,
-                message: `${keys.length} field updated successfully`,
-                data: dataRes
-            });
-        }
+        data.publishedAt = new Date();
+        data.isPublished = true
+        const dataRes = await blogSchema.findByIdAndUpdate(blogId, data, {
+            new: true
+        });
+        return response.status(200).send({
+            status: true,
+            message: `${keys.length} field updated successfully`,
+            data: dataRes
+        });
     } catch (error) {
         return response.status(500).send({
             status: false,
@@ -170,17 +176,14 @@ const deleteBlogById = async (request, response) => {
                 message: 'Blog Not Found !'
             });
         }
-        const isAuthorized = await middleware.authorization(request, response, blogRes.authorId);
-        if (isAuthorized) {
-            const dataRes = await blogSchema.findByIdAndUpdate(blogId, {
-                isDeleted: true,
-                deletedAt: new Date()
-            });
-            return response.status(200).send({
-                status: true,
-                message: 'Blog deleted successfully !'
-            });
-        }
+        const dataRes = await blogSchema.findByIdAndUpdate(blogId, {
+            isDeleted: true,
+            deletedAt: new Date()
+        });
+        return response.status(200).send({
+            status: true,
+            message: 'Blog deleted successfully !'
+        });
     } catch (error) {
         return response.status(500).send({
             status: false,

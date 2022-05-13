@@ -11,12 +11,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect("mongodb+srv://prakash_93:nzdQ9yMSM6uWLxcM@cluster0.fg71d.mongodb.net/groupXDatabase?retryWrites=true&w=majority", {
     useNewUrlParser: true
-})
-    .then(() => console.log("MongoDb is connected"))
-    .catch(err => console.log(err))
+}).then(() => console.log("MongoDb is connected"))
+    .catch(err => console.log(err.message))
 
 app.use('/', route);
-
 
 app.listen(3000, function () {
     console.log('Express app running on port ' + 3000)

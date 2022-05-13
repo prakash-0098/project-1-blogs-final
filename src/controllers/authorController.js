@@ -72,14 +72,14 @@ const login = async (request, response) => {
             email: data.email
         });
         if (!dataRes) {
-            return response.status(403).send({
+            return response.status(401).send({
                 status: false,
                 message: 'Invalid email id' // wrong email id
             });
         }
         bcrypt.compare(data.password, dataRes.password).then((result) => {
             if (!result) {
-                return response.status(403).send({
+                return response.status(401).send({
                     status: false,
                     message: 'Invalid email and password' // wrong password
                 });

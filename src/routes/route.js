@@ -11,8 +11,8 @@ router.post('/login', authorController.login);
 
 router.post('/blogs', middleware.auth, blogController.createBlog);
 router.get('/blogs', middleware.auth, blogController.fetchBlogs);
-router.put('/blogs/:blogId', middleware.auth, blogController.updatedBlog);
-router.delete('/blogs/:blogId', middleware.auth, blogController.deleteBlogById);
+router.put('/blogs/:blogId', middleware.auth, middleware.authorization, blogController.updatedBlog);
+router.delete('/blogs/:blogId', middleware.auth, middleware.authorization, blogController.deleteBlogById);
 router.delete('/blogs', middleware.auth, blogController.deleteByQuery);
 
 
